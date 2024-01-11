@@ -3,6 +3,7 @@ package com.example.demo.Security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,10 +39,12 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
                     .requestMatchers("auth/**").permitAll()
-                    .requestMatchers("/products/create").authenticated()
-                    .requestMatchers("/products/update").authenticated()
-                    .requestMatchers("/products/delete").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/products/**").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/products/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/products/**").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                     .requestMatchers("/users/update").authenticated()
+                    .requestMatchers("/users/delete").authenticated()
                     .anyRequest().permitAll()
                 .and()
                 .httpBasic();
