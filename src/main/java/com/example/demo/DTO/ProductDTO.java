@@ -1,6 +1,7 @@
 package com.example.demo.DTO;
 
 import com.example.demo.Entity.Review;
+import com.example.demo.Entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -3,10 +3,13 @@ package com.example.demo.Controller;
 import com.example.demo.DTO.ProductDTO;
 import com.example.demo.DTO.ProductResponse;
 import com.example.demo.Entity.Product;
+import com.example.demo.Entity.User;
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +19,12 @@ import java.util.List;
 public class ProductController {
 
     ProductService productService;
+    UserRepository userRepository;
 
     @Autowired
-    public ProductController(ProductService productService){
+    public ProductController(ProductService productService, UserRepository userRepository){
         this.productService = productService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -31,10 +36,15 @@ public class ProductController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO){
+    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO
+//            , Authentication authentication
+    ){
+//        String username = authentication.getName();
+//        User owner = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found:("));
         ProductDTO response = productService.createProduct(productDTO);
+//        response.setOwner(owner);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

@@ -1,16 +1,17 @@
 package com.example.demo.Entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "REVIEWS")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
+@Builder
 public class Review {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column

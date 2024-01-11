@@ -9,6 +9,7 @@ import com.example.demo.Entity.User;
 import com.example.demo.Repository.ProductRepository;
 import com.example.demo.Repository.ReviewRepository;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.Security.JWTGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,32 +26,36 @@ public class ProductService {
     ProductRepository productRepository;
 //    ReviewRepository reviewRepository;
     UserRepository userRepository;
+    JWTGenerator jwtGenerator;
 
     @Autowired
     public ProductService(ProductRepository productRepository,
                           UserRepository userRepository
 //                          ReviewRepository reviewRepository
+                          ,JWTGenerator jwtGenerator
     ){
         this.productRepository = productRepository;
 //        this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
+        this.jwtGenerator = jwtGenerator;
     }
+
     public ProductDTO createProduct(ProductDTO productDTO){
         Product product = new Product();
-//        User owner = userRepository.findById(productDTO.getOwnerId()).orElseThrow(()->new RuntimeException("User not found:("));
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-//        product.setOwner(owner);
+
+        // Associate it with the Owner
+        User owner = userRepository.findById(productDTO.getOwnerId()).orElseThrow(()->new RuntimeException("User not found:("));
+        product.setOwner(owner);
 
         Product newProduct = productRepository.save(product);
+//        newProduct.setOwner();
+        // Populate Owner Field
+//        productResponse.setOwnerId(newProduct.getOwner().getId());
 
-        ProductDTO productResponse = new ProductDTO();
-        productResponse.setId(newProduct.getId());
-        productResponse.setName(newProduct.getName());
-        productResponse.setDescription(newProduct.getDescription());
-        productResponse.setPrice(newProduct.getPrice());
-        return productResponse;
+        return mapToDTO(newProduct);
     }
 
 
@@ -102,6 +107,7 @@ public class ProductService {
         productDTO.setDescription(product.getDescription());
         productDTO.setPrice(product.getPrice());
 //        productDTO.setReviews(product.getReviews());
+        productDTO.setOwnerId(product.getOwner().getId());
         return productDTO;
     }
 

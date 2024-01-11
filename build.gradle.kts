@@ -34,6 +34,10 @@ dependencies {
 
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
+
+	runtimeOnly("com.h2database:h2")
+//	testImplementation("com.h2database:h2:1.3.148")
+
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
