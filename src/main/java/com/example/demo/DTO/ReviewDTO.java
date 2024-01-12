@@ -14,4 +14,5 @@ public class ReviewDTO {
     private Long id;
     private String content;
     private int rating;
+    private Long ownerId;
 }

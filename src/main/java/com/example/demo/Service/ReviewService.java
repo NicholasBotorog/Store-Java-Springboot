@@ -1,38 +1,43 @@
 package com.example.demo.Service;
 
-import com.example.demo.DTO.ProductDTO;
 import com.example.demo.DTO.ReviewDTO;
 import com.example.demo.Entity.Product;
 import com.example.demo.Entity.Review;
 import com.example.demo.Entity.User;
 import com.example.demo.Repository.ProductRepository;
 import com.example.demo.Repository.ReviewRepository;
+import com.example.demo.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final ProductService productService;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public ReviewService(ProductService productService,ReviewRepository reviewRepository, ProductRepository productRepository){
+    public ReviewService(ReviewRepository reviewRepository, ProductRepository productRepository, UserRepository userRepository){
         this.reviewRepository = reviewRepository;
-        this.productService = productService;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
-    public ReviewDTO addReview(Long productId, ReviewDTO reviewDTO){
+    public ReviewDTO addReview(Long productId, ReviewDTO reviewDTO, String username){
+        User owner = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found:("));
+
         Review review = mapToEntity(reviewDTO);
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found :("));
 
         review.setProduct(product);
+        review.setOwner(owner);
 
         Review newReview = reviewRepository.save(review);
 
@@ -56,7 +61,9 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewDTO updateReview(Long productId, Long id, ReviewDTO reviewDTO){
+    public ReviewDTO updateReview(Long productId, Long id, ReviewDTO reviewDTO) throws AccessDeniedException {
+        validateReviewOwner(productId, id);
+
         Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("Product not found:("));
         Review review = reviewRepository.findById(id).orElseThrow(()->new RuntimeException("Review not found:("));
 
@@ -72,7 +79,9 @@ public class ReviewService {
     }
 
     @Transactional
-    public String deleteReview(Long productId, Long reviewId){
+    public String deleteReview(Long productId, Long reviewId) throws AccessDeniedException {
+        validateReviewOwner(productId, reviewId);
+
         Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("Product not found:("));
         Review review = reviewRepository.findById(reviewId).orElseThrow(()->new RuntimeException("Review not found:("));
         if(review.getProduct().getId() != product.getId()){
@@ -86,13 +95,14 @@ public class ReviewService {
         return reviewRepository.count();
     }
 
-    private Review validateReviewOwnerAndProductId(Long productId, Long id) {
+    private void validateReviewOwner(Long productId, Long id) throws AccessDeniedException {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(()-> new RuntimeException("User not found:("));
         Review review = reviewRepository.findByIdAndProductId(id, productId).orElseThrow(() -> new RuntimeException("No Review here:("));
 
-//        if(!review.getOwner().equals(user.getName())){
-//            throw new RuntimeException("User not allowed to perform this task :(");
-//        }
-        return review;
+        if(!review.getOwner().equals(currentUser)){
+            throw new AccessDeniedException("Unauthorized!");
+        }
     }
 
     private ReviewDTO mapToDTO(Review review){
@@ -100,6 +110,7 @@ public class ReviewService {
         reviewDTO.setId(review.getId());
         reviewDTO.setContent(review.getContent());
         reviewDTO.setRating(review.getRating());
+        reviewDTO.setOwnerId(review.getOwner().getId());
         return reviewDTO;
     }
 

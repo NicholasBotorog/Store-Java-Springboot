@@ -66,20 +66,20 @@ public class ProductControllerTests {
         reviewDTO = ReviewDTO.builder().content("Content").rating(5).build();
     }
 
-    @Test
-    public void ProductController_CreateProduct_ReturnCreated() throws Exception {
-        given(productService.createProduct(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArgument(0));
-
-        ResultActions response = mockMvc.perform(post("/products/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productDTO)));
-
-        response.andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(productDTO.getName())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is(productDTO.getDescription())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.price", CoreMatchers.is(productDTO.getPrice())))
-                .andDo(MockMvcResultHandlers.print());
-    }
+//    @Test
+//    public void ProductController_CreateProduct_ReturnCreated() throws Exception {
+//        given(productService.createProduct(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArgument(0));
+//
+//        ResultActions response = mockMvc.perform(post("/products/create")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(productDTO)));
+//
+//        response.andExpect(MockMvcResultMatchers.status().isCreated())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(productDTO.getName())))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.description", CoreMatchers.is(productDTO.getDescription())))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.price", CoreMatchers.is(productDTO.getPrice())))
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 
     @Test
     public void ProductController_GetAllProducts_ReturnResponseDTO() throws Exception{

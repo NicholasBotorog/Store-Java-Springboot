@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.security.Principal;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public class ReviewController {
 
     @PostMapping("/{productId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ReviewDTO> postReview(@PathVariable(value="productId") Long productId, @RequestBody ReviewDTO reviewDTO){
-//        User currUser = userService.getUserByName(principal.getUsername());
-        return new ResponseEntity<>(reviewService.addReview(productId, reviewDTO), HttpStatus.CREATED);
+    public ResponseEntity<ReviewDTO> postReview(@PathVariable(value="productId") Long productId, @RequestBody ReviewDTO reviewDTO, Principal principal){
+        String username = principal.getName();
+        return new ResponseEntity<>(reviewService.addReview(productId, reviewDTO, username), HttpStatus.CREATED);
     }
 
     @GetMapping("/{productId}/reviews")
@@ -45,7 +46,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{productId}/reviews/{reviewId}")
-    public ResponseEntity<ReviewDTO> updateReview(@PathVariable(value="productId") Long productId, @PathVariable(value="reviewId") Long reviewId, @RequestBody ReviewDTO reviewDTO){
+    public ResponseEntity<ReviewDTO> updateReview(@PathVariable(value="productId") Long productId, @PathVariable(value="reviewId") Long reviewId, @RequestBody ReviewDTO reviewDTO) throws AccessDeniedException {
 //        User currUser = userService.getUserByName(principal.getName());
 //        return reviewService.updateReview(productId, id, review);
         ReviewDTO response = reviewService.updateReview(productId, reviewId, reviewDTO);
@@ -53,7 +54,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{productId}/reviews/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable(value="productId") Long productId,@PathVariable(value="reviewId") Long reviewId){
+    public ResponseEntity<String> deleteReview(@PathVariable(value="productId") Long productId,@PathVariable(value="reviewId") Long reviewId) throws AccessDeniedException {
 //        User currUser = userService.getUserByName(principal.getName());
         return new ResponseEntity<>(reviewService.deleteReview(productId, reviewId) ,HttpStatus.OK);
     }

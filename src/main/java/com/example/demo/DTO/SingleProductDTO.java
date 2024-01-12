@@ -1,7 +1,6 @@
 package com.example.demo.DTO;
 
 import com.example.demo.Entity.Review;
-import com.example.demo.Entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductDTO {
+public class SingleProductDTO {
     private Long id;
     public String name;
     private String description;
     private Double price;
+    private List<ReviewDTO> reviews = new ArrayList<ReviewDTO>();
     private Long ownerId;
 }

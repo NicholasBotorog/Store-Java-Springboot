@@ -1,13 +1,14 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTO.UserDTO;
-import com.example.demo.Entity.Product;
 import com.example.demo.Entity.User;
 import com.example.demo.Repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,21 +32,30 @@ public class UserService {
         return mapToDTO(user);
     }
 
-//    public UserDTO getUserByName(String name){
-//        User user = userRepository.findByUsername(name).orElseThrow(() -> new RuntimeException("No user with that name:("));
-//        return mapToDTO(user);
-//    }
+    public UserDTO updateUser(Long id, UserDTO userDTO) throws AccessDeniedException {
+        validateUserIsOwner(id);
 
-    public UserDTO updateUser(Long id, UserDTO userDTO){
         User user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found:("));
         user.setUsername(userDTO.getName());
         User userToUpdate = userRepository.save(user);
         return mapToDTO(userToUpdate);
     }
 
-    public String deleteUser(Long id){
+    public String deleteUser(Long id) throws AccessDeniedException {
+        validateUserIsOwner(id);
+
         userRepository.deleteById(id);
         return "Success!";
+    }
+
+    private void validateUserIsOwner(Long id) throws AccessDeniedException {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(()-> new RuntimeException("User not found:("));
+        User user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found:("));
+
+        if(!user.equals(currentUser)){
+            throw new AccessDeniedException("Unauthorized!");
+        }
     }
 
     private UserDTO mapToDTO(User user) {

@@ -4,8 +4,10 @@ import com.example.demo.DTO.ProductDTO;
 import com.example.demo.DTO.ReviewDTO;
 import com.example.demo.Entity.Product;
 import com.example.demo.Entity.Review;
+import com.example.demo.Entity.User;
 import com.example.demo.Repository.ProductRepository;
 import com.example.demo.Repository.ReviewRepository;
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.Service.ReviewService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,8 @@ public class ReviewServiceTests {
     private ReviewRepository reviewRepository;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private ReviewService reviewService;
 
@@ -59,10 +64,13 @@ public class ReviewServiceTests {
 
     @Test
     public void ReviewService_CreateReview_ReturnReviewDTO(){
+        User user = User.builder().username("test").password("test").build();
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
         when(reviewRepository.save(Mockito.any(Review.class))).thenReturn(review);
 
-        ReviewDTO saved = reviewService.addReview(product.getId(), reviewDTO);
+        ReviewDTO saved = reviewService.addReview(product.getId(), reviewDTO, user.getUsername());
 
         Assertions.assertThat(saved).isNotNull();
     }
@@ -93,7 +101,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    public void ReviewService_UpdateReview_ReturnReviewDTO(){
+    public void ReviewService_UpdateReview_ReturnReviewDTO() throws AccessDeniedException {
         long reviewId = 1;
         long productId = 1;
 

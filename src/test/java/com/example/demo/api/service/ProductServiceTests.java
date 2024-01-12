@@ -2,6 +2,7 @@ package com.example.demo.api.service;
 
 import com.example.demo.DTO.ProductDTO;
 import com.example.demo.DTO.ProductResponse;
+import com.example.demo.DTO.SingleProductDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.Product;
 import com.example.demo.Entity.User;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -54,7 +56,7 @@ public class ProductServiceTests {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(productRepository.save(Mockito.any(Product.class))).thenReturn(product);
 
-        ProductDTO saved = productService.createProduct(productDTO);
+        ProductDTO saved = productService.createProduct(productDTO, user.getUsername());
 
         Assertions.assertThat(saved).isNotNull();
     }
@@ -82,13 +84,13 @@ public class ProductServiceTests {
 
         when(productRepository.findById(1L)).thenReturn(Optional.ofNullable(product));
 
-        ProductDTO saved = productService.getProductById(1L);
+        SingleProductDTO saved = productService.getProductById(1L);
 
         Assertions.assertThat(saved).isNotNull();
     }
 
     @Test
-    public void ProductService_UpdateProduct_ReturnProductDTO(){
+    public void ProductService_UpdateProduct_ReturnProductDTO() throws AccessDeniedException {
         User user = User.builder().username("test").password("test").build();
         Product product = Product.builder()
                 .name("Test Product")
@@ -125,7 +127,7 @@ public class ProductServiceTests {
 
         when(productRepository.findById(1L)).thenReturn(Optional.ofNullable(product));
 
-        ProductDTO saved = productService.getProductById(1L);
+        SingleProductDTO saved = productService.getProductById(1L);
 
         assertAll(() -> productService.deleteProduct(1L));
     }
